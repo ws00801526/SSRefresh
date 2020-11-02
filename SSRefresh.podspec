@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   s.default_subspec = 'SR'
 
   s.subspec 'Base' do |ss|
-    ss.resource = 'Assets/Base/**/*'
+    ss.resource = 'Sources/*.{lproj, png}'
     ss.source_files = 'Sources/SSRefresh/*.swift'
   end
 

@@ -1,0 +1,9 @@
+// title of state refresh header
+"下拉即可刷新数据"         = "Kéo xuống để làm mới dữ liệu";
+"松开立即刷新"            = "Phát hành và làm mới ngay lập tức";
+"正在刷新数据中..."        = "Làm mới dữ liệu ...";
+
+// title of state refresh footer
+"上拉加载更多数据"         = "Kéo lên để tải thêm dữ liệu";
+"松开加载更多数据"         = "Phát hành và tải thêm dữ liệu";
+"正在加载更多数据..."      = "Đang tải thêm dữ liệu ...";
