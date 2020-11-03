@@ -5,9 +5,9 @@
 //  Created by XMFraker on 2020/10/19.
 //
 
-#if canImport(UIKit)
+#if canImport(Foundation)
 
-import UIKit
+import Foundation
 
 public class Language: RawRepresentable {
     public typealias RawValue = String
@@ -83,6 +83,11 @@ public extension Language.Key {
 }
 
 
+#if canImport(UIKit)
+
+import class UIKit.UIScrollView
+import struct UIKit.UIEdgeInsets
+
 public extension UIScrollView {
     
     /// The contentInset of the scrollView, iOS 11+ use adjustedContentInset, other use contentInset
@@ -94,5 +99,7 @@ public extension UIScrollView {
         }
     }
 }
+
+#endif
 
 #endif

@@ -271,14 +271,23 @@ public extension RefreshControl {
             public var refreshing: String? = Language.Key.HeaderRefreshingText.locaizedString
             public var emptyData: String? = Language.Key.FooterEmptyText.locaizedString
             
-            public static let header: Text = .init()
-            public static let footer: Text = .init(idle: Language.Key.FooterIdleText.locaizedString,
-                                                   ready: Language.Key.FooterReadyText.locaizedString,
-                                                   pulling: Language.Key.FooterIdleText.locaizedString,
-                                                   refreshing: Language.Key.FooterRefreshingText.locaizedString)
+            public static func header() -> Text {
+                return .init(idle: Language.Key.HeaderIdleText.locaizedString,
+                             ready: Language.Key.HeaderReadyText.locaizedString,
+                             pulling: Language.Key.HeaderIdleText.locaizedString,
+                             refreshing: Language.Key.HeaderRefreshingText.locaizedString)
+            }
+
+            public static func footer() -> Text {
+                return .init(idle: Language.Key.FooterIdleText.locaizedString,
+                             ready: Language.Key.FooterReadyText.locaizedString,
+                             pulling: Language.Key.FooterIdleText.locaizedString,
+                             refreshing: Language.Key.FooterRefreshingText.locaizedString,
+                             emptyData: Language.Key.FooterEmptyText.locaizedString)
+            }
         }
         
-        public var text: Text = .header
+        public var text: Text = .header()
         /// The refresh should be hover while it's refreshing
         public var isHoveringEnabled = true
         /// The refresh should be auto hidden while content frame is insufficient
@@ -291,8 +300,8 @@ public extension RefreshControl {
         public var animationDuration: TimeInterval = 0.3
 
         public static func `default`(of position: Position = .top) -> Config {
-            if position.isHeader { return .init(text: .header) }
-            return .init(text: .footer)
+            if position.isHeader { return .init(text: .header()) }
+            return .init(text: .footer())
         }
     }
 }

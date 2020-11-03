@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "SSRefresh",
+        "repositoryURL": "git@github.com:ws00801526/SSRefresh.git",
+        "state": {
+          "branch": null,
+          "revision": "e0db6b954b67f5e5f107c6282c82b6822c5ea2aa",
+          "version": "0.1.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
