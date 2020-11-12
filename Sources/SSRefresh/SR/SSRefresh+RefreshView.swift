@@ -11,9 +11,9 @@ import UIKit
 
 public protocol RefreshContentView: class {
     var contentView: UIView { get }
-    var position: RefreshControl.Position { get set }
+    var position: RefreshControl.Position { get }
     func show(_ state: RefreshControl.State, config: RefreshControl.Config, animated: Bool)
-    static func view(with position: RefreshControl.Position) -> RefreshContentView
+    init(position: RefreshControl.Position)
 }
 
 public extension RefreshContentView where Self : UIView {
@@ -36,7 +36,6 @@ extension RefreshControl {
             label.textColor = UIColor(white: 0.4, alpha: 1.0)
             label.textAlignment = .center
             label.backgroundColor = UIColor.clear
-            label.text = "下拉刷新"
             label.numberOfLines = position.isHorizontal ? 0 : 1
             label.sizeToFit()
             return label
@@ -61,9 +60,9 @@ extension RefreshControl {
             return stackView
         }()
         
-        required public init(frame: CGRect, position: RefreshControl.Position = .top) {
+        required public init(position: RefreshControl.Position = .top) {
             self.position = position
-            super.init(frame: frame)
+            super.init(frame: .init(origin: .zero, size: position.size()))
             autoresizingMask = [.flexibleWidth, .flexibleHeight]
             addSubview(stackView)
             if position.isHorizontal {
@@ -76,8 +75,12 @@ extension RefreshControl {
             }
         }
         
+        public override init(frame: CGRect) {
+            fatalError("using init(position:) insteaded")
+        }
+        
         required public init?(coder: NSCoder) {
-            fatalError("using init(frame:position:) insteaded")
+            fatalError("using init(position:) insteaded")
         }
     }
 }
@@ -146,11 +149,6 @@ extension RefreshControl.DefaultView : RefreshContentView {
         guard let toTransform = transform else { return }
         if animated { UIView.animate(withDuration: config.animationDuration, animations: { self.arrowView.transform = toTransform  }) }
         else { arrowView.transform = toTransform }
-    }
-    
-    public static func view(with position: RefreshControl.Position) -> RefreshContentView {
-        let frame: CGRect = .init(origin: .zero, size: position.size())
-        return RefreshControl.DefaultView.init(frame: frame, position: position)
     }
 }
 

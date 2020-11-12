@@ -47,15 +47,18 @@ extension UIScrollView {
 public final class RefreshControl: UIView {
     
     public typealias Action = ((RefreshControl) -> Void)
-    public let position: Position
     public var config: Config {
         didSet {
-            refreshView.show(state, config: config, animated: false)
+            contentView.show(state, config: config, animated: false)
         }
     }
     public private(set) var state: State = .idle
+    public private(set) var contentView: RefreshContentView!
     public var isRefreshing: Bool { return state == .refreshing }
-    
+    public var position: Position { return contentView.position }
+    public var refreshAction: Action? = nil
+    public var completion: Action? = nil
+
     final public private(set) weak var scrollView: UIScrollView? {
         didSet {
             guard let scrollView = scrollView else { return }
@@ -68,15 +71,12 @@ public final class RefreshControl: UIView {
     
     private var observers: [AnyObject] = []
     private var isKVOObservered: Bool = false
-    private let refreshView: RefreshContentView!
-    private let refreshAction: Action?
     
-    init(_ position: Position, config: Config = .default(), contentView: RefreshContentView? = nil, action: Action? = nil) {
-        self.position = position
+    init(_ contentView: RefreshContentView, config: Config = .default(), action: Action? = nil) {
         self.config = config
-        self.refreshView = contentView ?? RefreshControl.DefaultView.view(with: position)
+        self.contentView = contentView
         self.refreshAction = action
-        super.init(frame: self.refreshView.contentView.bounds)
+        super.init(frame: self.contentView.contentView.bounds)
         setup()
     }
     
@@ -85,9 +85,9 @@ public final class RefreshControl: UIView {
     }
     
     private func setup() {
-        addSubview(refreshView.contentView)
-        backgroundColor = refreshView.contentView.backgroundColor
-        refreshView.show(.idle, config: config, animated: false)
+        addSubview(contentView.contentView)
+        backgroundColor = contentView.contentView.backgroundColor
+        contentView.show(.idle, config: config, animated: false)
         
         let name: Notification.Name = UIDevice.orientationDidChangeNotification
         let observer = NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
@@ -125,7 +125,7 @@ extension RefreshControl {
         super.layoutSubviews()
         guard let superView = superview, !superView.bounds.equalTo(bounds) else { return }
         frame = .init(origin: frame.origin, size: position.size(of: superView))
-        refreshView.contentView.setNeedsLayout()
+        contentView.contentView.setNeedsLayout()
     }
     
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -195,7 +195,7 @@ private extension RefreshControl {
         
         // auto hidden if content frame is insufficient
         guard config.automaticHiddenWhileContentFrameInsufficient else { return }
-        if case .bottom = position { isHidden = scrollView.contentSize.height < scrollView.bounds.height }
+        if case .bottom = position { isHidden = scrollView.contentSize.height < scrollView.bounds.inset(by: scrollView.sr_contentInset).height }
         else if case .right = position { isHidden = scrollView.contentSize.width < scrollView.bounds.width }
     }
 
@@ -293,7 +293,7 @@ public extension RefreshControl {
         /// The refresh should be auto hidden while content frame is insufficient
         public var automaticHiddenWhileContentFrameInsufficient = true
         /// The refresh offset of
-        public var readyOffset: CGFloat = 10.0
+        public var readyOffset: CGFloat = 5.0
         /// The refresh content view margin with scrollView.
         public var contentInsetMargin: CGFloat = .zero
         /// The animation duration while refresh becoming hovering
@@ -347,12 +347,14 @@ public extension RefreshControl {
             let duration = animated ? self.config.animationDuration : TimeInterval.leastNormalMagnitude
             if [State.idle, .emptyData].contains(state), case .refreshing = oldState {
                 // restore contentInset while state change to .idle from refreshing
-                self.refreshView.show(state, config: self.config, animated: animated)
+                self.contentView.show(state, config: self.config, animated: animated)
                 UIView.animate(withDuration: self.config.animationDuration, delay: duration, options: .curveEaseInOut) {
                     self.adjustContentInset(false)
+                } completion: { _ in
+                    if let completion = self.completion { completion(self) }
                 }
             } else if case .refreshing = state, scrollView.panGestureRecognizer.state != .cancelled {
-                self.refreshView.show(state, config: self.config, animated: animated)
+                self.contentView.show(state, config: self.config, animated: animated)
                 UIView.animate(withDuration: duration, animations: {
                     self.adjustContentInset(true)
                     
@@ -366,7 +368,7 @@ public extension RefreshControl {
                 }
             } else {
                 guard self.state != .emptyData else { return }
-                self.refreshView.show(state, config: self.config, animated: animated)
+                self.contentView.show(state, config: self.config, animated: animated)
             }
         }
     }
@@ -413,7 +415,8 @@ extension RefreshWrapper where Base : UIScrollView {
     
     @discardableResult
     public func addRefresh(on position: RefreshControl.Position, config: RefreshControl.Config? = nil, contentView: RefreshContentView? = nil, action: RefreshControl.Action? = nil) -> RefreshControl {
-        let control = RefreshControl(position, config: config ?? .default(of: position), contentView: contentView, action: action)
+        let contentView = contentView ?? RefreshControl.DefaultView.init(position: position)
+        let control = RefreshControl(contentView, config: config ?? .default(of: position), action: action)
         base.addRefresh(control, on: position)
         return control
     }

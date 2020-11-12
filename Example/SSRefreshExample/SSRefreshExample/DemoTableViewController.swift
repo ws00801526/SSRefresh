@@ -10,6 +10,9 @@ import SSRefresh
 
 class DemoTableViewController: UITableViewController {
 
+    
+    var datas: Int = 15
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -29,37 +32,45 @@ class DemoTableViewController: UITableViewController {
         var config = RefreshControl.Config.default()
         config.text = .header()
         config.contentInsetMargin = .zero
-        tableView.sr.addRefresh(on: .top, config: config) { control in
+        tableView.sr.addRefresh(on: .top, config: config) { [weak self] in
             debugPrint("i am top refresh action")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                self.tableView.sr.top?.endRefresh()
-                self.tableView.sr.bottom?.resetEmptyData()
-            }
+            self?.fetchDatas($0)
+        }
+
+        tableView.sr.addRefresh(on: .bottom) { [weak self] control in
+            debugPrint("i am bottom refresh action")
+            self?.fetchDatas(control, more: true)
         }
         
-        tableView.sr.addRefresh(on: .bottom) { control in
-            debugPrint("i am bottom refresh action")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                control.endRefreshWithEmptyData()
-            }
-        }
-
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-//            self.tableView.sr.top?.beginRefresh()
-//        }
-        self.tableView.sr.top?.beginRefresh()
-
+        let headerView = UIView.init(frame: .init(x: 0.0, y: 0.0, width: 0.0, height: 50.0))
+        headerView.backgroundColor = .red
+        tableView.tableHeaderView = headerView
+        
         let footerView = UIView.init(frame: .init(x: 0.0, y: 0.0, width: 0.0, height: 34.0))
         tableView.tableFooterView = footerView
     }
 
+    
+    func fetchDatas(_ control: RefreshControl, more: Bool = false) {
+                
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            if more { self?.datas += 15 }
+            else { self?.datas = 15 }
+            self?.tableView.reloadData()
+            control.endRefresh()
+        }
+    }
+}
+
+extension DemoTableViewController {
+    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 30
+        return self.datas
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
