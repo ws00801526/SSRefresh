@@ -298,6 +298,8 @@ public extension RefreshControl {
         public var contentInsetMargin: CGFloat = .zero
         /// The animation duration while refresh becoming hovering
         public var animationDuration: TimeInterval = 0.3
+        /// The park duration while refresh completed, The RefreshControl will hide immidicatly if this value is zero. Default is 0.2,
+        public var parkingDuration: TimeInterval = 0.5
 
         public static func `default`(of position: Position = .top) -> Config {
             if position.isHeader { return .init(text: .header()) }
@@ -348,7 +350,8 @@ public extension RefreshControl {
             if [State.idle, .emptyData].contains(state), case .refreshing = oldState {
                 // restore contentInset while state change to .idle from refreshing
                 self.contentView.show(state, config: self.config, animated: animated)
-                UIView.animate(withDuration: self.config.animationDuration, delay: duration, options: .curveEaseInOut) {
+
+                UIView.animate(withDuration: self.config.animationDuration, delay: self.config.parkingDuration, options: .curveEaseInOut) {
                     self.adjustContentInset(false)
                 } completion: { _ in
                     if let completion = self.completion { completion(self) }

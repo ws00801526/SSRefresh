@@ -1,0 +1,6 @@
+retain_public: true
+schemes:
+- SSRefreshExample
+targets:
+- SSRefreshExample
+workspace: SSRefreshExample.xcworkspace

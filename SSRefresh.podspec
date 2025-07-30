@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Fraker.XM' => '3057600441@qq.com' }
   s.source           = { :git => 'https://github.com/ws00801526/SSRefresh.git', :tag => s.version.to_s }
-  s.ios.deployment_target = '10.0'
+  s.ios.deployment_target = '13.0'
   s.swift_version = '5.0'
   s.default_subspec = 'SR'
 
@@ -30,7 +30,12 @@ Pod::Spec.new do |s|
 
   s.subspec 'SR' do |ss|
     ss.dependency 'SSRefresh/Base'
-    ss.source_files = 'Sources/SSRefresh/SR/**/*'
+    ss.source_files = 'Sources/SSRefresh/SR/SSRefresh.swift', 'Sources/SSRefresh/SR/SSRefresh+RefreshView.swift'
+    ss.subspec 'Rx' do |sss|
+      sss.dependency 'RxSwift'
+      sss.dependency 'RxCocoa'
+      sss.source_files = 'Sources/SSRefresh/SR/SSRefresh+Reactive.swift'
+    end
   end
 
 end

@@ -27,7 +27,7 @@ class DemoTableViewController: UITableViewController {
 //            automaticallyAdjustsScrollViewInsets = false
 //        }
         
-        Language.setPreferredLanguage(.korean)
+        Language.setPreferredLanguage(.chineseSimplified)
         
         var config = RefreshControl.Config.default()
         config.text = .header()
@@ -36,11 +36,15 @@ class DemoTableViewController: UITableViewController {
             debugPrint("i am top refresh action")
             self?.fetchDatas($0)
         }
-
-        tableView.sr.addRefresh(on: .bottom) { [weak self] control in
-            debugPrint("i am bottom refresh action")
-            self?.fetchDatas(control, more: true)
-        }
+        
+//        tableView.sr.top?.rx.state.subscribe(onNext: {
+//            debugPrint("here is new state \($0)")
+//        })
+        
+//        tableView.sr.addRefresh(on: .bottom) { [weak self] control in
+//            debugPrint("i am bottom refresh action")
+//            self?.fetchDatas(control, more: true)
+//        }
         
         let headerView = UIView.init(frame: .init(x: 0.0, y: 0.0, width: 0.0, height: 50.0))
         headerView.backgroundColor = .red
@@ -59,6 +63,10 @@ class DemoTableViewController: UITableViewController {
             self?.tableView.reloadData()
             control.endRefresh()
         }
+    }
+    
+    deinit {
+        
     }
 }
 
